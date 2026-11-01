@@ -1,0 +1,19 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg"><meta name="theme-color" content="#6d5dfc"><title>LifeOS — Organise ta vie, avance sur l’essentiel</title>
+<link rel="stylesheet" href="styles.css"></head><body><div class="app"><aside class="side" id="side"><div class="brand"><div class="logo">L</div><div><b>LifeOS</b><small>Organise ta vie,<br>avance sur l’essentiel</small></div></div><nav class="nav" id="nav"></nav><div class="sidefoot"><button class="btn guideLink" onclick="go('guide')"><span aria-hidden="true">📘</span> <span>Guide pratique</span></button></div></aside><main class="main"><header class="top"><div style="display:flex;align-items:center;gap:10px"><button id="sideToggle" class="iconbtn menuToggle" onclick="toggleSide()" aria-controls="side" aria-expanded="false" aria-label="Ouvrir le menu"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><div><h1 id="pageTitle">Aujourd'hui</h1><small class="muted" id="dateLine"></small></div></div><div class="actions"><button class="iconbtn hideMobile" onclick="openQuick()">＋ Ajouter</button><button class="iconbtn" onclick="go('coach')" aria-label="Coach">✦</button></div></header><div class="content" id="content"></div></main></div><button class="sideBackdrop" type="button" onclick="toggleSide()" aria-label="Fermer le menu"></button><button class="fab" onclick="openQuick()" aria-label="Ajouter">+</button><div class="mobilebar" id="mobilebar"></div><div class="modalBack" id="modalBack"><div class="modal" id="modal"></div></div><div class="toast" id="toast"></div>
+<script>
+(()=>{
+ let shown=false;
+ const fail=message=>{
+  if(shown||window.lifeosStartupReady)return;shown=true;
+  const page=document.createElement('main');page.style.cssText='min-height:100vh;padding:28px;display:grid;place-items:center;background:#f5f7fb;color:#172033;font:16px system-ui,sans-serif';
+  const card=document.createElement('section');card.style.cssText='width:min(100%,620px);padding:24px;border:1px solid #e1e5ee;border-radius:20px;background:#fff;box-shadow:0 16px 40px #17203318';
+  const title=document.createElement('h1');title.textContent='Life OS n’a pas pu démarrer';title.style.cssText='font-size:22px;margin:0 0 10px';
+  const help=document.createElement('p');help.textContent='Le diagnostic ci-dessous permettra d’identifier le problème. Il ne contient pas tes données personnelles.';
+  const detail=document.createElement('pre');detail.textContent=String(message||'Initialisation incomplète. Vérifie que les fichiers Android sont bien présents dans l’APK.');detail.style.cssText='white-space:pre-wrap;overflow-wrap:anywhere;padding:12px;border-radius:10px;background:#f0f2f8;font:13px ui-monospace,monospace';
+  const retry=document.createElement('button');retry.type='button';retry.textContent='Relancer Life OS';retry.style.cssText='padding:11px 15px;border:0;border-radius:10px;background:#6d5dfc;color:white;font-weight:700';retry.onclick=()=>location.reload();
+  card.append(title,help,detail,retry);page.append(card);document.body.replaceChildren(page);
+ };
+ window.addEventListener('error',e=>{if(!window.lifeosStartupReady&&(e.target?.tagName==='SCRIPT'||e.message))fail([e.message||'Fichier JavaScript introuvable',e.filename||'',e.lineno?'ligne '+e.lineno:''].filter(Boolean).join('\n'));},true);
+ setTimeout(()=>{if(!window.lifeosStartupReady)fail('L’application ne s’est pas initialisée après 12 secondes. Vérifie le chargement de index.html et app.js dans les assets Android.');},12000);
+})();
+</script><script src="app.js"></script></body></html>

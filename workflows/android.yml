@@ -1,0 +1,60 @@
+name: Android APK et AAB
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Installer les composants Android SDK requis
+        run: |
+          ANDROID_HOME="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -x "$SDKMANAGER" ]; then SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -name sdkmanager -type f | sort -V | tail -n1)"; fi
+          yes | "$SDKMANAGER" --sdk_root="$ANDROID_HOME" --licenses >/dev/null
+          "$SDKMANAGER" --sdk_root="$ANDROID_HOME" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Installer les dépendances et tester
+        run: |
+          npm ci
+          npm test
+          npm run android:sync
+      - name: Préparer la signature de production (facultatif)
+        env:
+          KEYSTORE_BASE64: ${{ secrets.LIFEOS_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/lifeos-release.jks"
+            echo "LIFEOS_KEYSTORE=$RUNNER_TEMP/lifeos-release.jks" >> "$GITHUB_ENV"
+          fi
+      - name: Compiler APK et AAB
+        working-directory: android
+        env:
+          LIFEOS_STORE_PASSWORD: ${{ secrets.LIFEOS_STORE_PASSWORD }}
+          LIFEOS_KEY_ALIAS: ${{ secrets.LIFEOS_KEY_ALIAS }}
+          LIFEOS_KEY_PASSWORD: ${{ secrets.LIFEOS_KEY_PASSWORD }}
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug assembleRelease bundleRelease
+          ./gradlew signingReport > signing-report.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LifeOS-V6.4.2-Android
+          if-no-files-found: error
+          path: |
+            android/app/build/outputs/apk/debug/*.apk
+            android/app/build/outputs/apk/release/*.apk
+            android/app/build/outputs/bundle/release/*.aab
+            android/signing-report.txt

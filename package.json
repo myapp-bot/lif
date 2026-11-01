@@ -1,0 +1,27 @@
+{
+  "name": "lifeos-premium",
+  "version": "6.4.5",
+  "private": true,
+  "description": "LifeOS : objectifs, habitudes, focus, sauvegardes et sécurité Android",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "android:sync": "npm run build && npx cap sync android",
+    "android:open": "npx cap open android",
+    "serve": "npx http-server www -p 8080",
+    "test:browser": "npm run build && node tests/browser-check.cjs"
+  },
+  "dependencies": {
+    "@capacitor/android": "7.6.9",
+    "@capacitor/core": "7.6.9",
+    "@capacitor/local-notifications": "7.0.7"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "7.6.9",
+    "acorn": "8.15.0",
+    "playwright": "1.62.1"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
